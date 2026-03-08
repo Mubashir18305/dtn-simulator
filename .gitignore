@@ -1,0 +1,14 @@
+# Ignore Node stuff
+node_modules/
+
+# Ignore compiled C programs
+sat_a
+sat_b
+sat_c
+ground_station
+*.exe
+*.out
+
+# Ignore messy log files
+*.txt
+*.db
