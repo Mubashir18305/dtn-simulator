@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DTN Bundle Protocol</title>
+<title>DTN SIMULATOR - V2</title>
 <link rel="icon" type="image/png" href="isro.png">
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&display=swap');
+
+
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:#060e14;}
 :root{
@@ -20,12 +20,12 @@ html,body{height:100%;overflow:hidden;background:#060e14;}
 
 #top{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 22px;background:#040c14;border-bottom:1px solid var(--bdr);position:relative;}
 #top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan) 30%,var(--green) 70%,transparent);opacity:.4;}
-.logo{font-family:'Orbitron',monospace;font-size:15px;font-weight:700;letter-spacing:6px;color:var(--cyan);text-shadow:0 0 20px rgba(0,212,255,.4);}
+.logo{font-family: 'Courier New', Courier, monospace; font-size:16px; font-weight:700; letter-spacing:6px; color:var(--cyan); text-shadow:0 0 20px rgba(0,212,255,.4);}
 .logo b{color:var(--green);}
-#clk{font-family:'Share Tech Mono',monospace;font-size:21px;color:var(--green);letter-spacing:4px;}
+#clk{font-family: 'Courier New', Courier, monospace; font-size:21px; color:var(--green); letter-spacing:4px;}
 
 .hbadges{display:flex;gap:11px;}
-.hb{font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:1.4px;padding:3px 11px;border-radius:3px;border:1px solid var(--bdr);color:var(--dtxt);display:flex;align-items:center;gap:6px;transition:all .3s;}
+.hb{font-family: 'Courier New', Courier, monospace; font-size:13px; letter-spacing:1.4px; padding:3px 11px; border-radius:3px; border:1px solid var(--bdr); color:var(--dtxt); display:flex; align-items:center; gap:6px; transition:all .3s;}
 .hled{width:7px;height:7px;border-radius:50%;background:var(--dtxt);}
 .hb.alive{color:var(--green);border-color:rgba(0,255,157,.22);}
 .hb.alive .hled{background:var(--green);box-shadow:0 0 7px var(--green);animation:lp 2s ease-in-out infinite;}
@@ -38,43 +38,61 @@ html,body{height:100%;overflow:hidden;background:#060e14;}
 @keyframes lp{0%,100%{opacity:1}50%{opacity:.2}}
 
 #ctrl{background:var(--panel);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden;}
-.ph{padding:13px 20px;border-bottom:1px solid var(--bdr);font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:4px;color:var(--cyan);}
+.ph{padding:13px 20px;border-bottom:1px solid var(--bdr);font-family: 'Courier New', Courier, monospace; font-size:13px; font-weight: bold; letter-spacing:4px; color:var(--cyan);}
 .pb{padding:17px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:15px;}
-.flbl{font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:2px;color:var(--dtxt);text-transform:uppercase;margin-bottom:4px;}
-.fi{width:100%;padding:8px 13px;background:rgba(0,212,255,.03);border:1px solid var(--bdr);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:17px;outline:none;}
+.flbl{font-family: 'Courier New', Courier, monospace; font-size:13px; font-weight: bold; letter-spacing:2px; color:var(--dtxt); text-transform:uppercase; margin-bottom:4px;}
+.fi{width:100%;padding:8px 13px;background:rgba(0,212,255,.03);border:1px solid var(--bdr);border-radius:3px;color:var(--text);font-family: 'Courier New', Courier, monospace; font-size:17px; outline:none;}
 .fi:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,212,255,.14);}
 textarea.fi{resize:none;height:76px;}
 
 .btn-group { display: flex; gap: 11px; margin-top: 6px; }
-.txbtn{flex:2;padding:13px;cursor:pointer;background:linear-gradient(135deg,#002030,#004055);border:1px solid var(--cyan);border-radius:3px;color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:15px;letter-spacing:3px;transition:all .2s;}
+.txbtn{flex:2;padding:13px;cursor:pointer;background:linear-gradient(135deg,#002030,#004055);border:1px solid var(--cyan);border-radius:3px;color:var(--cyan);font-family: 'Courier New', Courier, monospace; font-size:15px; font-weight: bold; letter-spacing:3px; transition:all .2s;}
 .txbtn:hover{box-shadow:0 0 20px rgba(0,212,255,.2);}
 .txbtn:disabled{opacity:.28;cursor:not-allowed;}
-.stopbtn{flex:1;padding:13px;cursor:pointer;background:linear-gradient(135deg,#300000,#550000);border:1px solid var(--red);border-radius:3px;color:var(--red);font-family:'Share Tech Mono',monospace;font-size:15px;letter-spacing:3px;transition:all .2s;}
+.stopbtn{flex:1;padding:13px;cursor:pointer;background:linear-gradient(135deg,#300000,#550000);border:1px solid var(--red);border-radius:3px;color:var(--red);font-family: 'Courier New', Courier, monospace; font-size:15px; font-weight: bold; letter-spacing:3px; transition:all .2s;}
 .stopbtn:hover{box-shadow:0 0 20px rgba(255,48,96,.3);}
 .stopbtn:disabled{opacity:.28;cursor:not-allowed;}
 
-.clrbtn{width:100%;padding:8px;cursor:pointer;background:transparent;border:1px solid var(--dim);border-radius:3px;color:var(--dtxt);font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:3px;}
+.clrbtn{width:100%;padding:8px;cursor:pointer;background:transparent;border:1px solid var(--dim);border-radius:3px;color:var(--dtxt);font-family: 'Courier New', Courier, monospace; font-size:13px; font-weight: bold; letter-spacing:3px;}
 .clrbtn:hover{border-color:var(--red);color:var(--red);}
-
-#logbar { border-top: 1px solid var(--bdr); background: rgba(4,12,20,.9); }
-.log-tabs { display: flex; border-bottom: 1px solid var(--bdr); }
-.log-tab { flex: 1; padding: 8px; font-family: 'Share Tech Mono'; font-size: 11px; color: var(--dtxt); text-align: center; cursor: pointer; border-right: 1px solid var(--bdr); text-transform: uppercase;}
-.log-tab.active { color: var(--cyan); background: rgba(0,212,255,0.1); border-bottom: 1px solid var(--cyan);}
-#log-content { height: 182px; overflow-y: auto; padding: 11px; font-family: 'Share Tech Mono'; font-size: 14px; color: #6ab0d0; white-space: pre-wrap; line-height: 1.4;}
-#log-content::-webkit-scrollbar{width:3px;}
-#log-content::-webkit-scrollbar-thumb{background:var(--dim);}
 
 #winbar{border-top:1px solid var(--bdr);padding:10px 17px;background:rgba(4,12,20,.9);}
 .wrow{display:flex;align-items:center;gap:11px;}
-#cdtimer{font-family:'Share Tech Mono',monospace;font-size:17px;color:var(--yellow);letter-spacing:3px;min-width:126px;}
+#cdtimer{font-family: 'Courier New', Courier, monospace; font-size:17px; color:var(--yellow); letter-spacing:3px; min-width:126px;}
 #cdtimer.open{color:var(--green);text-shadow:0 0 10px rgba(0,255,157,.35);}
 #wbtrack{flex:1;height:4px;background:rgba(255,255,255,.04);border-radius:2px;}
 #wbfill{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:2px;transition:width .2s linear;}
-#wlink{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green);}
+#wlink{font-family: 'Courier New', Courier, monospace; font-size:13px; font-weight: bold; color:var(--green);}
 
 #right{display:grid;grid-template-rows:1fr 1fr;overflow:hidden;}
 #mapwrap{position:relative;overflow:hidden;background:var(--bg);}
 #c{position:absolute;inset:0;width:100%;height:100%;}
+
+/* =========================================================
+   HUD LOG BAR: ABSOLUTE POSITIONING TO FORCE TOP-RIGHT
+   ========================================================= */
+#logbar { 
+    position: absolute; 
+    top: 20px; 
+    right: 20px; 
+    width: 380px; 
+    background: rgba(4, 12, 20, 0.90); 
+    border: 1px solid var(--cyan); 
+    border-radius: 4px; 
+    z-index: 9999; 
+    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+.log-tabs { display: flex; border-bottom: 1px solid var(--cyan); background: rgba(0,212,255,0.05); border-radius: 4px 4px 0 0; }
+.log-tab { flex: 1; padding: 10px 8px; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; color: var(--dtxt); text-align: center; cursor: pointer; border-right: 1px solid var(--dim); text-transform: uppercase;}
+.log-tab:last-child { border-right: none; }
+.log-tab.active { color: #fff; background: rgba(0,212,255,0.2); border-bottom: 2px solid var(--cyan);}
+#log-content { height: 260px; overflow-y: auto; padding: 13px; font-family: 'Courier New', Courier, monospace; font-size: 14px; color: #6ab0d0; white-space: pre-wrap; line-height: 1.4;}
+#log-content::-webkit-scrollbar{width:4px;}
+#log-content::-webkit-scrollbar-thumb{background:var(--cyan); border-radius: 2px;}
+/* ========================================================= */
+
 .nnode{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;z-index:10;}
 .nring{width:81px;height:81px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;}
 .nring::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--dim);opacity:.35;transition:.4s;}
@@ -87,11 +105,11 @@ textarea.fi{resize:none;height:76px;}
 .nnode.on .ncore{border-color:var(--cyan);box-shadow:0 0 28px rgba(0,212,255,.38);}
 .nnode.tx .ncore{border-color:var(--orange);box-shadow:0 0 28px rgba(255,107,53,.45);}
 .nnode.rx .ncore{border-color:var(--green);box-shadow:0 0 28px rgba(0,255,157,.42);}
-.nlbl{margin-top:6px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--dtxt);}
+.nlbl{margin-top:6px;font-family: 'Courier New', Courier, monospace; font-size:11px; font-weight: bold; letter-spacing:2px; color:var(--dtxt); text-shadow: 0 2px 4px rgba(0,0,0,0.8);}
 
 #term{background:#020a10;border-top:1px solid var(--bdr);overflow:hidden;display:flex;flex-direction:column;}
-#termhdr{padding:8px 20px;border-bottom:1px solid var(--bdr);background:#030d16;font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:3px;color:var(--cyan);display:flex;justify-content:space-between;align-items:center;}
-#termout{flex:1;overflow-y:auto;padding:14px 20px;font-family:'Share Tech Mono',monospace;font-size:17.5px;line-height:1.65;color:#6ab0d0;}
+#termhdr{padding:8px 20px;border-bottom:1px solid var(--bdr);background:#030d16;font-family: 'Courier New', Courier, monospace; font-size:13px; font-weight: bold; letter-spacing:3px; color:var(--cyan); display:flex; justify-content:space-between; align-items:center;}
+#termout{flex:1;overflow-y:auto;padding:14px 20px;font-family: 'Courier New', Courier, monospace; font-size:17.5px; line-height:1.65; color:#6ab0d0;}
 #termout::-webkit-scrollbar{width:3px;}
 #termout::-webkit-scrollbar-thumb{background:var(--dim);}
 
@@ -112,7 +130,7 @@ textarea.fi{resize:none;height:76px;}
 
 <div id="top">
   <div style="display: flex; align-items: center; gap: 15px;">
-    <img src="isro.png" alt="ISRO" style="height: 45px; width: auto;">
+    <img src="isro.png" alt="ISRO" style="height: 45px; width: auto; color: var(--cyan); font-family: monospace;">
     <div class="logo">DTN&#183;<b>SIM</b></div>
   </div>
   <div class="hbadges">
@@ -162,16 +180,6 @@ textarea.fi{resize:none;height:76px;}
     <button class="clrbtn" onclick="clearTerm()">&#10005; CLEAR TERMINAL</button>
   </div>
   
-  <div id="logbar">
-    <div class="log-tabs">
-        <div class="log-tab active" onclick="switchTab('gs', this)">gs.txt</div>
-        <div class="log-tab" onclick="switchTab('a', this)">a.txt</div>
-        <div class="log-tab" onclick="switchTab('b', this)">b.txt</div>
-        <div class="log-tab" onclick="switchTab('c', this)">c.txt</div>
-    </div>
-    <div id="log-content">Awaiting logs...</div>
-  </div>
-
   <div id="winbar">
     <div class="wrow">
       <div id="cdtimer">--:--:--</div>
@@ -182,13 +190,26 @@ textarea.fi{resize:none;height:76px;}
 </div>
 
 <div id="right">
+  
   <div id="mapwrap">
     <canvas id="c"></canvas>
+    
+    <div id="logbar">
+      <div class="log-tabs">
+          <div class="log-tab active" onclick="switchTab('gs', this)">gs.txt</div>
+          <div class="log-tab" onclick="switchTab('a', this)">a.txt</div>
+          <div class="log-tab" onclick="switchTab('b', this)">b.txt</div>
+          <div class="log-tab" onclick="switchTab('c', this)">c.txt</div>
+      </div>
+      <div id="log-content">AWAITING TELEMETRY (HUD ACTIVE)...</div>
+    </div>
+
     <div class="nnode on" id="n-gs"><div class="nring"><div class="ncore">&#127758;</div></div><div class="nlbl">gs</div></div>
     <div class="nnode"    id="n-sat_a"><div class="nring"><div class="ncore">&#128752;</div></div><div class="nlbl">sat_a</div></div>
     <div class="nnode"    id="n-sat_b"><div class="nring"><div class="ncore">&#128752;</div></div><div class="nlbl">sat_b</div></div>
     <div class="nnode"    id="n-sat_c"><div class="nring"><div class="ncore">&#128752;</div></div><div class="nlbl">sat_c</div></div>
   </div>
+  
   <div id="term">
     <div id="termhdr">
       <span>&#9632; TERMINAL OUTPUT</span>
@@ -198,6 +219,8 @@ textarea.fi{resize:none;height:76px;}
   </div>
 </div>
 </div>
+
+<script src="/socket.io/socket.io.js"></script>
 
 <script>
 let running = false;
@@ -218,8 +241,9 @@ function T(cls,txt){
   to.appendChild(d); to.scrollTop=to.scrollHeight;
 }
 
+
 let socket = null;
-try { socket = io('http://localhost:3000'); } 
+try { socket = io(); } 
 catch(e) { console.warn("Socket.io not found."); }
 
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
@@ -315,53 +339,55 @@ function openWinUI() {
     fill.style.width = '100%';
 }
 
-socket.on('engine_log', (data) => {
-    let msg = data.msg.trim();
-    if (!msg) return;
+if(socket) {
+    socket.on('engine_log', (data) => {
+        let msg = data.msg.trim();
+        if (!msg) return;
 
-    let cls = 't-def';
-    
-    if (msg.includes('WAITING') || msg.includes('window is currently') || msg.includes('MISSED')) cls = 't-win';
-    else if (msg.includes('AOS Established')) cls = 't-aos';
-    else if (msg.includes('FOV Achieved') || msg.includes('LOS Confirmed')) cls = 't-fov';
-    else if (msg.includes('> Data beamed to')) cls = 't-send';
-    else if (msg.includes('CYCLE COMPLETE') || msg.includes('FINAL DELIVERY')) cls = 't-success';
-    else if (msg.includes('Turn Around Time') || msg.includes('Queue Time') || msg.includes('Nodes Queued') || msg.includes('Avg Queue')) cls = 't-tat';
-    else if (msg.includes('ERROR')) cls = 't-err';
-    else if (msg.includes('===') || msg.includes('---')) cls = 't-sep';
+        let cls = 't-def';
+        
+        if (msg.includes('WAITING') || msg.includes('window is currently') || msg.includes('MISSED')) cls = 't-win';
+        else if (msg.includes('AOS Established')) cls = 't-aos';
+        else if (msg.includes('FOV Achieved') || msg.includes('LOS Confirmed')) cls = 't-fov';
+        else if (msg.includes('> Data beamed to')) cls = 't-send';
+        else if (msg.includes('CYCLE COMPLETE') || msg.includes('FINAL DELIVERY')) cls = 't-success';
+        else if (msg.includes('Turn Around Time') || msg.includes('Queue Time') || msg.includes('Nodes Queued') || msg.includes('Avg Queue')) cls = 't-tat';
+        else if (msg.includes('ERROR')) cls = 't-err';
+        else if (msg.includes('===') || msg.includes('---')) cls = 't-sep';
 
-    T(cls, `[${data.node.toUpperCase()}] ${msg}`);
+        T(cls, `[${data.node.toUpperCase()}] ${msg}`);
 
-    if (msg.includes('[WAITING]')) {
-        let parts = msg.split('|');
-        if (parts.length >= 3) {
-            let link = parts[0].replace('[WAITING]', '').trim();
-            let waitStr = parts[2].replace('Wait:', '').replace('sec', '').trim();
-            startWinUI(link, parseFloat(waitStr) * 1000);
+        if (msg.includes('[WAITING]')) {
+            let parts = msg.split('|');
+            if (parts.length >= 3) {
+                let link = parts[0].replace('[WAITING]', '').trim();
+                let waitStr = parts[2].replace('Wait:', '').replace('sec', '').trim();
+                startWinUI(link, parseFloat(waitStr) * 1000);
+            }
+        } 
+        else if (msg.includes('AOS Established') || msg.includes('[ACTIVE]')) {
+            openWinUI();
         }
-    } 
-    else if (msg.includes('AOS Established') || msg.includes('[ACTIVE]')) {
-        openWinUI();
-    }
-    else if (msg.includes('> Data beamed to')) {
-        const toNode = msg.split('to ')[1].split(' ')[0].replace(/[()]/g, '').trim(); 
-        fireBeam(data.node, toNode, data.node === 'gs' ? '#00d4ff' : '#ff6b35');
-        
-        setNode(data.node, 'tx');
-        setNode(toNode, 'rx'); 
-        
-        setTimeout(() => { 
-            setNode(data.node, ''); 
-            setNode(toNode, ''); 
-        }, 400);
-    }
-    else if (msg.includes('CYCLE COMPLETE')) {
-        running = false;
-        document.getElementById('txbtn').disabled = false;
-        document.getElementById('stopbtn').disabled = true;
-        setTimeout(() => { socket.emit('kill'); }, 1000);
-    }
-});
+        else if (msg.includes('> Data beamed to')) {
+            const toNode = msg.split('to ')[1].split(' ')[0].replace(/[()]/g, '').trim(); 
+            fireBeam(data.node, toNode, data.node === 'gs' ? '#00d4ff' : '#ff6b35');
+            
+            setNode(data.node, 'tx');
+            setNode(toNode, 'rx'); 
+            
+            setTimeout(() => { 
+                setNode(data.node, ''); 
+                setNode(toNode, ''); 
+            }, 400);
+        }
+        else if (msg.includes('CYCLE COMPLETE')) {
+            running = false;
+            document.getElementById('txbtn').disabled = false;
+            document.getElementById('stopbtn').disabled = true;
+            setTimeout(() => { socket.emit('kill'); }, 1000);
+        }
+    });
+}
 
 function handleLaunch() {
     running = true;
@@ -400,7 +426,7 @@ setInterval(() => {
         .then(r => r.ok ? r.text() : "")
         .then(text => {
             if(text.includes('<!DOCTYPE') || text.includes('<html')) return;
-            document.getElementById('log-content').textContent = text || "Awaiting logs...";
+            document.getElementById('log-content').textContent = text || "AWAITING TELEMETRY (HUD ACTIVE)...";
         })
         .catch(e=>{});
 }, 1000);
