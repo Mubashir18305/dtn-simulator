@@ -9,6 +9,13 @@ ground_station
 *.exe
 *.out
 
-# Ignore messy log files
+# Ignore messy log files BUT keep visibility.txt
 *.txt
+!visibility.txt
 *.db
+
+# Ignore local bundle storage directories
+store_a/
+store_b/
+store_c/
+store_gs/
