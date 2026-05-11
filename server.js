@@ -31,6 +31,21 @@ function killZombies() {
 // Kill zombies immediately on server boot just in case
 killZombies();
 
+// Authentication Middleware
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
+if (!ADMIN_TOKEN) {
+    console.warn("WARNING: ADMIN_TOKEN environment variable is not set. Simulation will deny all connections.");
+}
+
+io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    if (ADMIN_TOKEN && token === ADMIN_TOKEN) {
+        next();
+    } else {
+        next(new Error('Authentication Error: Invalid Token'));
+    }
+});
+
 io.on('connection', (socket) => {
     socket.on('start_simulation', (data) => {
         
