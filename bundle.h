@@ -64,7 +64,6 @@ void wait_until_visibility(Visibility *v, Bundle *b);
 void serialize_bundle(const Bundle *b, char *buffer);
 void deserialize_bundle(Bundle *b, char *buffer);
 int bp_get_bdu_size(const Bundle *b);
-void print_hop_metrics(const Bundle *b, const Visibility *vis, long long q_time);
 
 void bp_create_bundle(Bundle *b, int id, const char *src, const char *dest, const char *custodian, const char *current_node, int lifetime_sec, const char *data, int frag_length, int frag_offset, int total_adu_len, int is_fragment, const char *route, int link_bps, long long creation_ts);
 int bp_store_bundle(const Bundle *b, const char *storage_dir);
