@@ -35,10 +35,16 @@ typedef struct {
     PrimaryBlock primary; ExtensionBlock ext_block; PayloadBlock payload_block;
 } Bundle;
 
+#define SLOT_EMPTY   0
+#define SLOT_ACTIVE  1
+#define SLOT_DELETED 2
+
 struct ReassemblyBuffer {
-    int active; long long creation_ts; int total_len; int recv_len;
+    int state; long long creation_ts; int total_len; int recv_len;
     char full_payload[4096]; long long queue_time_sum; int node_count_max;
 };
+
+#define REASSEMBLY_TABLE_SIZE 256
 
 typedef struct {
     char from_node[32]; char to_node[32];
