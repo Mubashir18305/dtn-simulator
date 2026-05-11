@@ -92,5 +92,5 @@ io.on('connection', (socket) => {
 // CLOUD DEPLOYMENT FIX: Dynamic Port Binding
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`DTN Unified Engine running on port ${PORT}`);
+    console.log(`DTN Unified Engine running on port ${server.address().port}`);
 });
