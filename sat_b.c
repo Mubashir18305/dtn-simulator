@@ -27,7 +27,7 @@ int main() {
         char buffer[4096] = {0};
         int client = accept_client(server_fd);
         
-        // FIX: CPU Guard
+        // CPU Guard
         if (client < 0) { safe_sleep_ms(100); continue; }
         
         receive_message(client, buffer);
