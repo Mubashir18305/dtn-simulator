@@ -8,7 +8,7 @@
 #define STORE   "./store_gs"
 #define TRACKER "gs.txt"
 
-struct ReassemblyBuffer reassembly[5];
+struct ReassemblyBuffer reassembly[REASSEMBLY_TABLE_SIZE];
 
 int main() {
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -18,7 +18,7 @@ int main() {
     int server_fd = create_server(local_port);
     static long long next_search_time = 0; 
     
-    for(int i=0; i<5; i++) reassembly[i].active = 0;
+    for(int i=0; i<REASSEMBLY_TABLE_SIZE; i++) reassembly[i].state = SLOT_EMPTY;
 
     while (1) {
         long long cycle_start_time = 0;

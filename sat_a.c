@@ -11,14 +11,18 @@
 int bundle_id_counter = 2000; 
 // ==========================================
 
-struct ReassemblyBuffer reassembly[5];
+struct ReassemblyBuffer reassembly[REASSEMBLY_TABLE_SIZE];
+
+static unsigned int hash_function(long long ts) {
+    return (unsigned int)(((unsigned long long)ts) % REASSEMBLY_TABLE_SIZE);
+}
 
 int main() {
     setvbuf(stdout, NULL, _IONBF, 0);
     char next_hop[32];
     Bundle b, ack;
     int local_port = get_port_for_node(NODE_ID);
-    for(int i=0; i<5; i++) reassembly[i].active = 0;
+    for(int i=0; i<REASSEMBLY_TABLE_SIZE; i++) reassembly[i].state = SLOT_EMPTY;
     static long long next_search_time = 0;
 
     int server_fd = create_server(local_port);
@@ -74,15 +78,38 @@ int main() {
             
             if (b.primary.flags & BP_FLAG_IS_FRAGMENT) {
                 int r_idx = -1;
-                for(int i=0; i<5; i++) { if (reassembly[i].active && reassembly[i].creation_ts == b.primary.creation_timestamp) { r_idx = i; break; } }
+                unsigned int idx = hash_function(b.primary.creation_timestamp);
+                unsigned int start_idx = idx;
+
+                // Lookup
+                for (int step = 0; step < REASSEMBLY_TABLE_SIZE; step++) {
+                    if (reassembly[idx].state == SLOT_EMPTY) {
+                        break; // End of chain, not found
+                    }
+                    if (reassembly[idx].state == SLOT_ACTIVE && reassembly[idx].creation_ts == b.primary.creation_timestamp) {
+                        r_idx = idx; // Found
+                        break;
+                    }
+                    // Skip over SLOT_DELETED and non-matching SLOT_ACTIVE
+                    idx = (idx + 1) % REASSEMBLY_TABLE_SIZE;
+                }
+
+                // Insert if not found
                 if (r_idx == -1) {
-                    for(int i=0; i<5; i++) {
-                        if (!reassembly[i].active) {
-                            r_idx = i; reassembly[i].active = 1; reassembly[i].creation_ts = b.primary.creation_timestamp;
-                            reassembly[i].total_len = b.payload_block.total_adu_length; reassembly[i].recv_len = 0;
-                            memset(reassembly[i].full_payload, 0, sizeof(reassembly[i].full_payload));
-                            reassembly[i].queue_time_sum = 0; reassembly[i].node_count_max = 0; break;
+                    idx = start_idx;
+                    for (int step = 0; step < REASSEMBLY_TABLE_SIZE; step++) {
+                        if (reassembly[idx].state == SLOT_EMPTY || reassembly[idx].state == SLOT_DELETED) {
+                            r_idx = idx;
+                            reassembly[idx].state = SLOT_ACTIVE;
+                            reassembly[idx].creation_ts = b.primary.creation_timestamp;
+                            reassembly[idx].total_len = b.payload_block.total_adu_length;
+                            reassembly[idx].recv_len = 0;
+                            memset(reassembly[idx].full_payload, 0, sizeof(reassembly[idx].full_payload));
+                            reassembly[idx].queue_time_sum = 0;
+                            reassembly[idx].node_count_max = 0;
+                            break;
                         }
+                        idx = (idx + 1) % REASSEMBLY_TABLE_SIZE;
                     }
                 }
 
@@ -126,7 +153,7 @@ int main() {
                                 next_search_time = get_global_time(); 
                             }
                         }
-                        reassembly[r_idx].active = 0; 
+                        reassembly[r_idx].state = SLOT_DELETED;
                     }
                 }
             } else {
