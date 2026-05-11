@@ -46,7 +46,7 @@ typedef struct {
     int bandwidth_bps;
 } Visibility;
 
-void safe_sleep_ms(long long ms); // <--- FIX: Added missing declaration here
+void safe_sleep_ms(long long ms);
 long long get_global_time(void);
 void format_time(long long t_ms, char *buf, size_t max_size);
 long long parse_vis_time(const char *time_str);
