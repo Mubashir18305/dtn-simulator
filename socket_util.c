@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <errno.h>
 
 int create_server(int port) {
     int server_fd;
@@ -22,8 +23,12 @@ int create_server(int port) {
     
     // FIX: Detect Zombie processes holding the port and exit gracefully!
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-        printf("\n[FATAL ERROR] Port %d is already in use by a Zombie process!\n", port);
-        printf("Please run this command in your terminal: killall -9 sat_a sat_b sat_c ground_station\n\n");
+        if (errno == EADDRINUSE) {
+            printf("\n[FATAL ERROR] Port %d is already in use by a Zombie process!\n", port);
+            printf("Please run this command in your terminal: killall -9 sat_a sat_b sat_c ground_station\n\n");
+        } else {
+            perror("Bind failed");
+        }
         exit(1);
     }
     if (listen(server_fd, 10) < 0) {
