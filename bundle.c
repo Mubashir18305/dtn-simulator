@@ -109,28 +109,82 @@ void extract_reverse_path_to_source(const char *forward_route, const char *curre
     }
 }
 
-int load_visibility(const char *from, const char *to, long long current_time, Visibility *vis, int bps) {
+typedef struct {
+    char from_node[32];
+    char to_node[32];
+    long long start_t;
+    long long end_t;
+} CachedVisibility;
+
+static CachedVisibility *visibility_cache = NULL;
+static int cache_count = -1;
+
+static void ensure_cache_loaded() {
+    if (cache_count != -1) return;
+
     FILE *f = fopen("visibility.txt", "r");
-    char f_node[32], t_node[32], start_str[32], end_str[32];
+    if (!f) {
+        cache_count = 0;
+        return;
+    }
+
+    char line[256];
+    int count = 0;
+    if (fgets(line, sizeof(line), f)) { // skip header
+        while (fgets(line, sizeof(line), f)) {
+            count++;
+        }
+    }
+
+    if (count == 0) {
+        fclose(f);
+        cache_count = 0;
+        return;
+    }
+
+    visibility_cache = (CachedVisibility *)malloc(count * sizeof(CachedVisibility));
+    if (!visibility_cache) {
+        fclose(f);
+        cache_count = 0;
+        return;
+    }
+
+    rewind(f);
+    fgets(line, sizeof(line), f); // skip header again
+
+    int i = 0;
+    while (fgets(line, sizeof(line), f) && i < count) {
+        char f_node[32], t_node[32], start_str[32], end_str[32];
+        if (sscanf(line, "%31s %31s %31s %31s", f_node, t_node, start_str, end_str) >= 4) {
+            strncpy(visibility_cache[i].from_node, f_node, 31);
+            visibility_cache[i].from_node[31] = '\0';
+            strncpy(visibility_cache[i].to_node, t_node, 31);
+            visibility_cache[i].to_node[31] = '\0';
+            visibility_cache[i].start_t = parse_vis_time(start_str);
+            visibility_cache[i].end_t = parse_vis_time(end_str);
+            i++;
+        }
+    }
+    cache_count = i;
+    fclose(f);
+}
+
+int load_visibility(const char *from, const char *to, long long current_time, Visibility *vis, int bps) {
+    ensure_cache_loaded();
     long long best_start = -1, best_end = -1;
     int found = 0;
 
-    if (f) {
-        char line[256]; fgets(line, sizeof(line), f);
-        while (fgets(line, sizeof(line), f)) {
-            if (sscanf(line, "%31s %31s %31s %31s", f_node, t_node, start_str, end_str) >= 4) {
-                if (strcmp(from, f_node) == 0 && strcmp(to, t_node) == 0) {
-                    long long start_t = parse_vis_time(start_str);
-                    long long end_t = parse_vis_time(end_str);
-                    if (end_t > current_time) {
-                        if (!found || start_t < best_start) {
-                            best_start = start_t; best_end = end_t; found = 1;
-                        }
-                    }
+    for (int i = 0; i < cache_count; i++) {
+        if (strcmp(from, visibility_cache[i].from_node) == 0 &&
+            strcmp(to, visibility_cache[i].to_node) == 0) {
+            long long start_t = visibility_cache[i].start_t;
+            long long end_t = visibility_cache[i].end_t;
+            if (end_t > current_time) {
+                if (!found || start_t < best_start) {
+                    best_start = start_t; best_end = end_t; found = 1;
                 }
             }
         }
-        fclose(f);
     }
     
     if (!found) {
