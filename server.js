@@ -28,12 +28,23 @@ function killZombies() {
     }
 }
 
+const crypto = require('crypto');
+
+// Generate or use an existing admin token
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || crypto.randomBytes(16).toString('hex');
+
 // Kill zombies immediately on server boot just in case
 killZombies();
 
 io.on('connection', (socket) => {
     socket.on('start_simulation', (data) => {
+        if (!data || data.token !== ADMIN_TOKEN) {
+            socket.emit('auth_error', { msg: 'Unauthorized: Invalid or missing token.' });
+            return;
+        }
         
+        socket.isAdmin = true;
+
         // 1. Guarantee a clean slate before launching
         killZombies();
 
@@ -80,12 +91,18 @@ io.on('connection', (socket) => {
     });
 
     // 5. Triggered by the Stop button OR auto-triggered on Cycle Complete
-    socket.on('kill', () => {
+    socket.on('kill', (data) => {
+        if (!data || data.token !== ADMIN_TOKEN) {
+            socket.emit('auth_error', { msg: 'Unauthorized: Invalid or missing token.' });
+            return;
+        }
         killZombies();
     });
     
     socket.on('disconnect', () => {
-        killZombies();
+        if (socket.isAdmin) {
+            killZombies();
+        }
     });
 });
 
@@ -93,4 +110,5 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`DTN Unified Engine running on port ${PORT}`);
+    console.log(`[SECURITY] ADMIN_TOKEN for this session is: ${ADMIN_TOKEN}`);
 });
