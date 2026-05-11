@@ -323,7 +323,6 @@ int bp_deliver_bundle(Bundle *b, const char *local_node_id, const char *storage_
     return 0;
 }
 
-// FIX: ULTIMATE SECURITY LOCK AGAINST DUMMY LOGS!
 void write_bundle_tracker(const Bundle *b, const char *filename) {
     if (b == NULL || b->primary.version != 7) return; // physically refuses non-DTN data
 
