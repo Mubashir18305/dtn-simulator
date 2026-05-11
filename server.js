@@ -29,7 +29,9 @@ function killZombies() {
 }
 
 // Kill zombies immediately on server boot just in case
-killZombies();
+if (require.main === module) {
+    killZombies();
+}
 
 io.on('connection', (socket) => {
     socket.on('start_simulation', (data) => {
@@ -90,7 +92,16 @@ io.on('connection', (socket) => {
 });
 
 // CLOUD DEPLOYMENT FIX: Dynamic Port Binding
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`DTN Unified Engine running on port ${PORT}`);
-});
+if (require.main === module) {
+    const PORT = process.env.PORT || 3000;
+    server.listen(PORT, '0.0.0.0', () => {
+        console.log(`DTN Unified Engine running on port ${PORT}`);
+    });
+}
+
+// Export for testing
+module.exports = {
+    killZombies,
+    getActiveProcesses: () => activeProcesses,
+    setActiveProcesses: (processes) => { activeProcesses = processes; }
+};
