@@ -232,8 +232,6 @@ int bp_get_bdu_size(const Bundle *b) {
     char temp[4096]; serialize_bundle(b, temp); return strlen(temp);
 }
 
-void print_hop_metrics(const Bundle *b, const Visibility *vis, long long q_time) { }
-
 void bp_create_bundle(Bundle *b, int id, const char *src, const char *dest,
                       const char *custodian, const char *current_node,
                       int lifetime_sec, const char *data, int frag_length, int frag_offset, int total_adu_len,
