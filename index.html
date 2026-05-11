@@ -169,6 +169,10 @@ textarea.fi{resize:none;height:76px;}
       <div class="flbl">TRANSMISSION START TIME</div>
       <input class="fi" id="starttime" placeholder="e.g. 14:30:00:00" value="">
     </div>
+    <div>
+      <div class="flbl">ADMIN TOKEN</div>
+      <input class="fi" id="token" type="password" placeholder="Enter session token">
+    </div>
     <div class="btn-group">
       <button class="txbtn" id="txbtn" onclick="handleLaunch()">&#9654; TRANSMIT</button>
       <button class="stopbtn" id="stopbtn" onclick="handleStop()" disabled>&#9209; STOP</button>
@@ -379,8 +383,15 @@ if(socket) {
             running = false;
             document.getElementById('txbtn').disabled = false;
             document.getElementById('stopbtn').disabled = true;
-            setTimeout(() => { socket.emit('kill'); }, 1000);
+            setTimeout(() => { socket.emit('kill', { token: document.getElementById('token').value }); }, 1000);
         }
+    });
+
+    socket.on('auth_error', (data) => {
+        T('t-err', `\n[SECURITY] ${data.msg}\n`);
+        running = false;
+        document.getElementById('txbtn').disabled = false;
+        document.getElementById('stopbtn').disabled = true;
     });
 }
 
@@ -396,12 +407,13 @@ function handleLaunch() {
         size: document.getElementById('msz').value,
         payload: document.getElementById('payload').value,
         bps: document.getElementById('bps').value,
-        time: document.getElementById('starttime').value || "00:00:00:00"
+        time: document.getElementById('starttime').value || "00:00:00:00",
+        token: document.getElementById('token').value
     });
 }
 
 function handleStop() {
-    socket.emit('kill');
+    socket.emit('kill', { token: document.getElementById('token').value });
     document.getElementById('txbtn').disabled = false;
     document.getElementById('stopbtn').disabled = true;
     T('t-err', '\n[SYSTEM] SEQUENCE ABORTED BY OPERATOR\n');
