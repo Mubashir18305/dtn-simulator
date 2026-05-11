@@ -5,10 +5,23 @@
 #include "bundle.h"
 
 // ==========================================
-#define NODE_ID "sat_b"
-#define STORE   "./store_b"
-#define TRACKER "b.txt"
-int bundle_id_counter = 3000; 
+#ifndef NODE_ID
+#error "NODE_ID must be defined"
+#endif
+
+#ifndef STORE
+#error "STORE must be defined"
+#endif
+
+#ifndef TRACKER
+#error "TRACKER must be defined"
+#endif
+
+#ifndef BUNDLE_ID_START
+#error "BUNDLE_ID_START must be defined"
+#endif
+
+int bundle_id_counter = BUNDLE_ID_START;
 // ==========================================
 
 struct ReassemblyBuffer reassembly[5];

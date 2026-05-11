@@ -15,9 +15,9 @@ RUN npm install
 COPY . .
 
 # 6. Compile the C space engines exactly as they are named in your folder
-RUN gcc bundle.c socket_util.c sat_a.c -o sat_a && \
-    gcc bundle.c socket_util.c sat_b.c -o sat_b && \
-    gcc bundle.c socket_util.c sat_c.c -o sat_c && \
+RUN gcc -DNODE_ID=\"sat_a\" -DSTORE=\"./store_a\" -DTRACKER=\"a.txt\" -DBUNDLE_ID_START=2000 bundle.c socket_util.c generic_sat.c -o sat_a && \
+    gcc -DNODE_ID=\"sat_b\" -DSTORE=\"./store_b\" -DTRACKER=\"b.txt\" -DBUNDLE_ID_START=3000 bundle.c socket_util.c generic_sat.c -o sat_b && \
+    gcc -DNODE_ID=\"sat_c\" -DSTORE=\"./store_c\" -DTRACKER=\"c.txt\" -DBUNDLE_ID_START=4000 bundle.c socket_util.c generic_sat.c -o sat_c && \
     gcc bundle.c socket_util.c ground_station.c -o ground_station
 
 # 7. Grant execution permissions to the compiled engines
