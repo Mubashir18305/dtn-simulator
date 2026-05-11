@@ -238,7 +238,29 @@ function T(cls,txt){
 
 // AIR-GAP FIX: Dynamic local routing
 let socket = null;
-try { socket = io(); } 
+try {
+    let token = localStorage.getItem('sim_token');
+    if (!token) {
+        token = prompt("Please enter the admin token to connect to the simulation:");
+        if (token) localStorage.setItem('sim_token', token);
+    }
+
+    socket = io({
+        auth: {
+            token: token
+        }
+    });
+
+    socket.on('connect_error', (err) => {
+        console.error("Connection Error:", err.message);
+        if (err.message.includes('Authentication Error')) {
+            alert("Authentication failed. Please check your token.");
+            localStorage.removeItem('sim_token');
+            // Optionally reload to prompt again
+            // window.location.reload();
+        }
+    });
+}
 catch(e) { console.warn("Socket.io not found."); }
 
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
